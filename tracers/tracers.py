@@ -1,9 +1,4 @@
 """
-tracers.tracers
----------------
-author: bczsalba
-
-
 This submodule provides all the methods for the module.
 """
 
@@ -12,7 +7,7 @@ from __future__ import annotations
 import inspect
 from typing import Any, Callable
 
-import pytermgui as ptg
+from zenith import zml, zprint, zml_alias
 
 # I'm not sure where this class is defined.
 Traceback = Any
@@ -27,7 +22,7 @@ Press [bold 208]Y[/] to accept changes, [bold 138]D[/] to drop changes and\
  [bold 210]Q[/] to quit."""
 
 
-ptg.markup.alias("code", "@236 246")
+zml_alias(code="@236 246")
 
 
 def get_caller(depth: int = 1) -> Traceback:
@@ -53,10 +48,15 @@ def get_caller(depth: int = 1) -> Traceback:
 
 def trace(
     attribute: str,
+    *,
+    output: str | None = None,
+    interactive: bool = True,
     getter: Callable[[str], Any] | None = None,
     setter: Callable[[object, Any], None] | None = None,
 ) -> Callable[[object], Any]:
     """Decorator to trace changes of an attribute
+
+    `output != None` implies `interactive=False`.
 
     Usage:
         >>> from tracers import trace
@@ -72,6 +72,9 @@ def trace(
         >>> Q
     """
 
+    if output != None:
+        open(output, "w").close()
+
     def decorator(cls: object) -> object:
         sunder = "_" + attribute
 
@@ -85,20 +88,32 @@ def trace(
 
             filename, lineno, funcname, code, _ = get_caller()
 
-            print(
-                ptg.markup.parse(
-                    TEMPLATE.format(
-                        obj=obj,
-                        attribute=attribute,
-                        current=getattr(obj, sunder),
-                        new=new,
-                        filename=filename,
-                        funcname=funcname,
-                        lineno=lineno,
-                        code=code[0].strip(),
+            if output != None:
+                with open(output, "a") as file:
+                    file.write(
+                        f"{obj!r}.{attribute}: {getattr(obj, sunder)!r} -> {new}\n"
+                        + f"{lineno}: {code[0].strip()}\n\n"
                     )
+
+                setattr(cls, sunder, new)
+                return
+
+            zprint(
+                TEMPLATE.format(
+                    obj=obj,
+                    attribute=attribute,
+                    current=getattr(obj, sunder),
+                    new=new,
+                    filename=filename,
+                    funcname=funcname,
+                    lineno=lineno,
+                    code=code[0].strip(),
                 )
             )
+
+            if not interactive:
+                setattr(cls, sunder, new)
+                return
 
             inp = input(">>> ").lower()
             if inp == "y":

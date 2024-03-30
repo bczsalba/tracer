@@ -9,7 +9,6 @@ pip install attr-tracers
 ```
 
 [![PyPI version](https://raw.githubusercontent.com/bczsalba/tracer/master/assets/version.svg)](https://pypi.org/project/tracer)
-[![Pylint quality](https://raw.githubusercontent.com/bczsalba/tracer/master/assets/quality.svg)](https://github.com/bczsalba/tracer/blob/master/utils/create_badge.py)
 
 Usage
 -----
@@ -30,7 +29,6 @@ class MyClass:
 <a href="https://raw.githubusercontent.com/bczsalba/tracer/master/assets/tracer.webp">
   <img src="https://raw.githubusercontent.com/bczsalba/tracer/master/assets/screenshot.png"></img>
 </a>
-
 
 You can set custom setter and getter methods for your trace, practically allowing you to subcribe to read/write events of an attribute.
 
@@ -59,6 +57,8 @@ class MyClass:
        self.test = 0
 
 ```
+
+You can also optionally output traces into a file non-interactively using the `output` argument.
 
 Please note that these methods do **NOT** get a reference to `attr`. This is a quirk of properties, but you can work around it using namespace-based referencing, like above.
 
